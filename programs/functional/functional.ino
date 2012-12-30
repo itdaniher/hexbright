@@ -48,7 +48,7 @@ void setup() {
 
 void loop() {
   hb.update();
-  static int brightness_level = 4;
+  static int brightness_level = 1;
 
   //// Button actions to recognize, one-time actions to take as a result
   if(hb.button_released()) {
@@ -56,9 +56,9 @@ void loop() {
       // ignore, could be a bounce
     } else if(hb.button_held()<300) { //<300 milliseconds
       mode = CYCLE_MODE;
-      int levels[] = {1,250,500,750,1000};
-      brightness_level = (brightness_level+1)%5;
-      hb.set_light(CURRENT_LEVEL, levels[brightness_level], 150);
+      int levels[] = {1,500,1000};
+      brightness_level = (brightness_level+1)%3;
+      hb.set_light(CURRENT_LEVEL, levels[brightness_level], 100);
     } else if (hb.button_held() < 700) {
       mode = BLINKY_MODE;
     }
@@ -68,31 +68,5 @@ void loop() {
     // in case we are under usb power, reset state
     hb.set_light(0, 0, 1);
     brightness_level = 4;
-  }
-
-
-  //// Actions over time for a given mode
-  if(mode == BLINKY_MODE) { // just blink
-    static int i = 0;
-    if(!i) {
-      hb.set_light(MAX_LOW_LEVEL,0,MS); // because time = MS, we'll only hit the endpoints
-      i=400/MS;
-    }
-    i--;
-  } else if (mode == CYCLE_MODE) { // print the current flashlight temperature
-    if(!hb.printing_number()) {
-      hb.print_number(hb.get_fahrenheit());
-    }
-  } else if (mode == OFF_MODE) { // charging, or turning off
-    hb.shutdown();
-    if(!hb.printing_number()) {
-      byte charge_state = hb.get_charge_state();
-      if(charge_state==CHARGED) {
-        // always runs = always on (the last parameter could be any positive value)
-        hb.set_led(GLED, 1); 
-      } else if (charge_state==CHARGING && hb.get_led_state(GLED)==LED_OFF) {
-        hb.set_led(GLED, 200,200);
-      }
-    }
   }
 }
